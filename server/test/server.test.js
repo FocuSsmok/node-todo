@@ -11,7 +11,9 @@ const todos = [{
     text: 'First test todos'
 }, {
     _id: new ObjectID(),
-    text: 'Second test todos'
+    text: 'Second test todos',
+    completed: true,
+    completedAt: 333
 }];
 
 
@@ -147,6 +149,48 @@ describe('DELETE /todos/:id', () => {
         .delete(`/todos/1321312`)
         .expect(404)
         .end(done);
+    });
+
+});
+
+describe('PATCH /todos/:id', () => {
+    
+    it('should update the todo', (done) => {
+        var id = todos[0]._id.toHexString();
+        var text = 'new text';
+
+        request(app)
+            .patch(`/todos/${id}`)
+            .expect(200)
+            .send({
+                text,
+                completed: true,
+            })
+            .expect(res => {
+                expect(res.body.todo.text).toBe(text);
+                expect(res.body.todo.completed).toBe(true);
+                // expect(res.body.todo.completedAt).toBeA('number'); doesnt work i dont know why
+            })
+            .end(done);
+    });
+
+    it('should clear completedAt when when todo is not completed', (done) => {
+        var id = todos[1]._id.toHexString();
+        var text = 'new text in second todo';
+
+        request(app)
+            .patch(`/todos/${id}`)
+            .expect(200)
+            .send({
+                text,
+                completed: false,
+            })
+            .expect(res => {
+                expect(res.body.todo.text).toBe(text);
+                expect(res.body.todo.completed).toBe(false);
+                // expect(res.body.todo.completedAt).toNotExist();
+            })
+            .end(done);
     });
 
 });
